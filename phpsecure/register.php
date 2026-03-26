@@ -12,6 +12,8 @@ $lastName  = trim($data['lastName']  ?? '');
 $email     = trim($data['email']     ?? '');
 $password  = $data['password']       ?? '';
 $role      = $data['type']           ?? 'student';
+$city      = trim($data['wilaya']    ?? '');   // city/region (was "wilaya")
+$country   = trim($data['country']   ?? '');
 
 // ── Validate required fields ────────────────────────────────────────────────
 if (!$firstName || !$lastName || !$email || !$password) {

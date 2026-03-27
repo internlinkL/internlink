@@ -1,41 +1,53 @@
 <?php
 session_start();
-header('Content-Type: application/json');
 require 'db.php';
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 
-$data      = json_decode(file_get_contents("php://input"), true);
-$firstName = trim($data['firstName'] ?? '');
-$lastName  = trim($data['lastName']  ?? '');
-$email     = trim($data['email'] ?? '');
-$password  = $data['password'] ?? '';
-$role      = $data['type'] ?? 'student';
+// ── Read form POST data ─────────────────────────────────────────────
+$firstName = trim($_POST['firstName'] ?? '');
+$lastName  = trim($_POST['lastName']  ?? '');
+$email     = trim($_POST['email']     ?? '');
+$password  = $_POST['password']       ?? '';
+$role      = $_POST['type']           ?? 'student';
+$city      = trim($_POST['wilaya']    ?? '');
+$country   = trim($_POST['country']   ?? '');
 
-// Validate fields
+// ── Validate required fields ───────────────────────────────────────
 if (!$firstName || !$lastName || !$email || !$password) {
-    echo json_encode(['success'=>false,'message'=>'Please fill in all required fields.']); exit;
+    die('Please fill in all required fields.');
 }
-if (!filter_var($email,FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['success'=>false,'message'=>'Invalid email.']); exit;
-}
-if (strlen($password)<8) {
-    echo json_encode(['success'=>false,'message'=>'Password must be at least 8 characters.']); exit;
-}
-$allowed_roles=['student','company'];
-if(!in_array($role,$allowed_roles)) $role='student';
 
-// Duplicate check
-$stmt=$pdo->prepare("SELECT id FROM users WHERE email=? LIMIT 1");
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    die('Invalid email address.');
+}
+
+if (strlen($password) < 8) {
+    die('Password must be at least 8 characters.');
+}
+
+// ── Validate role ──────────────────────────────────────────────────
+$allowed_roles = ['student', 'company'];
+if (!in_array($role, $allowed_roles)) {
+    $role = 'student';
+}
+
+// ── Check for duplicate email ─────────────────────────────────────
+$stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
 $stmt->execute([$email]);
-if($stmt->fetch()){ echo json_encode(['success'=>false,'message'=>'Email already exists.']); exit; }
+if ($stmt->fetch()) {
+    die('This email is already registered.');
+}
 
-// Insert user
-$hashed=password_hash($password,PASSWORD_DEFAULT);
-$stmt=$pdo->prepare("INSERT INTO users(first_name,last_name,email,password,role) VALUES(?,?,?,?,?)");
-$success=$stmt->execute([$firstName,$lastName,$email,$hashed,$role]);
+// ── Hash password and insert user ──────────────────────────────────
+$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-if($success){ echo json_encode(['success'=>true,'message'=>'Account created successfully']); }
-else{ echo json_encode(['success'=>false,'message'=>'Server error. Try again later.']); }
+$stmt = $pdo->prepare("
+    INSERT INTO users (first_name, last_name, email, password, role)
+    VALUES (?, ?, ?, ?, ?)
+");
+
+if ($stmt->execute([$firstName, $lastName, $email, $hashedPassword, $role])) {
+    echo 'Account created successfully!';
+} else {
+    die('Something went wrong. Please try again.');
+}
 ?>

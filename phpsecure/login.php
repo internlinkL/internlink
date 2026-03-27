@@ -67,19 +67,6 @@ $headers = 'From: no-reply@internlink.com';
 
 $mailSent = @mail($to, $subject, $body, $headers);
 
-// ── DEV FALLBACK: log OTP to file if mail() fails ─
-// Remove this block before going to production!
-if (!$mailSent) {
-    $logDir  = __DIR__ . '/../logs/';
-    if (!is_dir($logDir)) mkdir($logDir, 0755, true);
-    $logFile = $logDir . 'otp_dev.log';
-    $logLine = '[' . date('Y-m-d H:i:s') . '] '
-             . 'Email: ' . $email
-             . ' | OTP: ' . $otp
-             . ' | Expires: ' . $expires . PHP_EOL;
-    file_put_contents($logFile, $logLine, FILE_APPEND);
-}
-
 echo json_encode([
     'success'      => true,
     'requires_2fa' => true,

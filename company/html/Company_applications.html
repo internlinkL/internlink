@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>internLink — Student Applications</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0f1e; --surface: #111827; --surface2: #1a2236; --surface3: #212d45;
+      --accent: #4f8ef7; --accent2: #a78bfa; --accent3: #34d399; --accent4: #fb923c;
+      --text: #f0f4ff; --muted: #8899bb; --border: rgba(79,142,247,0.18);
+      --danger: #f87171; --warning: #facc15; --sidebar-w: 260px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; z-index: 50; overflow-y: auto; }
+    .sidebar-header { padding: 28px 24px 20px; border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: -0.03em; }
+    .logo span { color: var(--accent); }
+    .company-badge { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 10px 12px; background: rgba(79,142,247,0.08); border-radius: 10px; border: 1px solid var(--border); }
+    .cab { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg,var(--accent),var(--accent2)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .cn { font-size: 0.85rem; font-weight: 600; }  .cr { font-size: 0.72rem; color: var(--accent3); }
+    .nav-section { padding: 16px 12px 8px; }
+    .nav-label { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); padding: 0 12px; margin-bottom: 6px; font-weight: 600; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(79,142,247,0.12); color: var(--accent); }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 0.7rem; font-weight: 700; padding: 2px 7px; border-radius: 100px; }
+    .nav-badge.warn { background: var(--accent4); }
+    .sidebar-footer { margin-top: auto; padding: 16px 12px; border-top: 1px solid var(--border); }
+
+    /* Main */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 16px 40px; background: rgba(10,15,30,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .theme-toggle { width: 44px; height: 24px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; position: relative; padding: 0; }
+    .theme-toggle-knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); transition: transform 0.3s; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    body.light .theme-toggle-knob { transform: translateX(20px); }
+
+    .content { padding: 32px 40px; flex: 1; }
+
+    /* Offer tabs */
+    .offers-tabs-wrap { margin-bottom: 28px; }
+    .offers-tabs-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; font-weight: 500; }
+    .offers-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .offer-tab {
+      padding: 7px 16px; border-radius: 100px; font-size: 0.82rem; font-weight: 500;
+      border: 1.5px solid var(--border); background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .offer-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .offer-tab.active { background: rgba(79,142,247,0.12); border-color: var(--accent); color: var(--accent); }
+    .offer-tab .tab-count { font-size: 0.72rem; background: var(--surface2); border-radius: 100px; padding: 1px 6px; margin-left: 4px; }
+    .offer-tab.active .tab-count { background: rgba(79,142,247,0.25); }
+
+    /* Stats strip */
+    .stats-strip { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .stat-chip { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; }
+    .stat-chip .num { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; }
+    .stat-chip.all  .num { color: var(--accent); }
+    .stat-chip.wait .num { color: var(--warning); }
+    .stat-chip.ok   .num { color: var(--accent3); }
+    .stat-chip.no   .num { color: var(--danger); }
+
+    /* Filter bar */
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .search-wrap input { width: 100%; padding: 9px 12px 9px 36px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans',sans-serif; font-size: 0.875rem; outline: none; transition: all 0.2s; }
+    .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.12); }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.82rem; pointer-events: none; }
+    .filter-select { padding: 9px 14px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; color: var(--muted); font-family: 'DM Sans',sans-serif; font-size: 0.875rem; outline: none; cursor: pointer; transition: all 0.2s; }
+    .filter-select:focus { border-color: var(--accent); color: var(--text); }
+
+    /* Applications table */
+    .app-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .app-table-head { display: grid; grid-template-columns: 2.5fr 1.5fr 1fr 1.2fr 120px; gap: 0; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    .th { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+    .app-row {
+      display: grid; grid-template-columns: 2.5fr 1.5fr 1fr 1.2fr 120px;
+      align-items: center; padding: 14px 20px; border-bottom: 1px solid rgba(79,142,247,0.07);
+      transition: background 0.15s; cursor: pointer;
+    }
+    .app-row:last-child { border-bottom: none; }
+    .app-row:hover { background: rgba(79,142,247,0.04); }
+    .student-cell { display: flex; align-items: center; gap: 12px; }
+    .stu-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+    .stu-name { font-size: 0.875rem; font-weight: 600; margin-bottom: 2px; }
+    .stu-uni { font-size: 0.75rem; color: var(--muted); }
+    .cell-text { font-size: 0.83rem; color: var(--muted); }
+    .cell-date { font-size: 0.78rem; color: var(--muted); }
+
+    /* Status badge + dropdown */
+    .status-wrap { position: relative; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; user-select: none;
+    }
+    .status-badge:hover { filter: brightness(1.15); }
+    .sb-wait  { background: rgba(250,204,21,0.1);  color: var(--warning); border-color: rgba(250,204,21,0.2); }
+    .sb-ok    { background: rgba(52,211,153,0.1);  color: var(--accent3); border-color: rgba(52,211,153,0.2); }
+    .sb-no    { background: rgba(248,113,113,0.1); color: var(--danger);  border-color: rgba(248,113,113,0.2); }
+    .status-drop {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 100;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      min-width: 150px; box-shadow: 0 10px 36px rgba(0,0,0,0.25); overflow: hidden;
+      display: none;
+    }
+    .status-drop.open { display: block; }
+    .status-drop-item { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 0.83rem; cursor: pointer; transition: background 0.15s; }
+    .status-drop-item:hover { background: var(--surface2); }
+
+    /* App actions */
+    .app-actions { display: flex; gap: 6px; justify-content: flex-end; }
+    .btn-sm { padding: 6px 12px; border-radius: 8px; font-family: 'DM Sans',sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted); }
+    .btn-sm:hover { background: var(--surface3); color: var(--text); }
+    .btn-sm.primary { background: rgba(79,142,247,0.12); border-color: rgba(79,142,247,0.3); color: var(--accent); }
+
+    /* Empty */
+    .empty-table { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.9rem; }
+
+    /* Student profile modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; align-items: flex-start; justify-content: flex-end; }
+    .modal-overlay.open { display: flex; }
+    .profile-drawer {
+      width: 420px; height: 100vh; background: var(--surface); border-left: 1px solid var(--border);
+      overflow-y: auto; display: flex; flex-direction: column;
+      animation: slideRight 0.3s ease both;
+    }
+    @keyframes slideRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 22px 24px 18px; border-bottom: 1px solid var(--border); }
+    .drawer-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    .drawer-close { width: 32px; height: 32px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+    .drawer-body { padding: 24px; flex: 1; }
+
+    .student-profile-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+    .stu-avatar-lg { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0; }
+    .stu-profile-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .stu-profile-uni { font-size: 0.83rem; color: var(--muted); margin-bottom: 8px; }
+    .stu-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .stu-tag { font-size: 0.72rem; padding: 3px 10px; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+
+    .profile-section { margin-bottom: 20px; }
+    .profile-section-title { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+    .profile-section p { font-size: 0.875rem; color: var(--muted); line-height: 1.65; }
+    .skills-list { display: flex; gap: 6px; flex-wrap: wrap; }
+    .skill-chip { font-size: 0.78rem; padding: 4px 10px; border-radius: 6px; background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
+
+    .drawer-foot { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn-full { flex: 1; padding: 11px; border-radius: 10px; font-family: 'DM Sans',sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-accept { background: rgba(52,211,153,0.15); color: var(--accent3); border: 1.5px solid rgba(52,211,153,0.3) !important; }
+    .btn-accept:hover { background: rgba(52,211,153,0.25); }
+    .btn-reject { background: rgba(248,113,113,0.1); color: var(--danger); border: 1.5px solid rgba(248,113,113,0.2) !important; }
+    .btn-reject:hover { background: rgba(248,113,113,0.18); }
+
+    /* Light mode */
+    body.light { --bg:#f4f7ff; --surface:#ffffff; --surface2:#e8edf8; --surface3:#dde4f5; --accent:#3b7de8; --accent2:#7c3aed; --accent3:#059669; --text:#0f172a; --muted:#64748b; --border:rgba(59,125,232,0.2); --danger:#dc2626; --warning:#d97706; }
+    body.light .topbar { background: rgba(244,247,255,0.9); }
+    body.light .search-wrap input, body.light .filter-select { background: var(--surface) !important; color: var(--text) !important; }
+    body.light .app-table-head { background: var(--surface2); }
+
+    @media (max-width: 960px) {
+      .app-table-head { display: none; }
+      .app-row { grid-template-columns: 1fr; gap: 8px; }
+      .profile-drawer { width: 100vw; }
+      .content { padding: 20px 16px; }
+      .topbar { padding: 14px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">intern<span>Link</span></div>
+    <div class="company-badge"><div class="cab">TC</div><div><div class="cn">TechCorp Inc.</div><div class="cr">Company Account</div></div></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="company_dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
+    <a class="nav-item" href="company_offers.html"><span class="nav-icon">📋</span> Internship Offers <span class="nav-badge">4</span></a>
+    <a class="nav-item active" href="company_applications.html"><span class="nav-icon">👥</span> Applications <span class="nav-badge warn" id="sideApps">7</span></a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a class="nav-item" href="company_profile.html"><span class="nav-icon">🏢</span> Company Profile</a>
+    <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications</a>
+    <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Settings</a>
+  </div>
+  <div class="sidebar-footer"><a class="nav-item" href="logout.php" style="color:var(--danger)"><span class="nav-icon">🚪</span> Log Out</a></div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title">Student Applications</div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()"><div class="theme-toggle-knob" id="themeKnob">🌙</div></button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Offer filter tabs -->
+    <div class="offers-tabs-wrap">
+      <div class="offers-tabs-label">Filter by offer</div>
+      <div class="offers-tabs" id="offerTabs"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-strip" id="statsStrip"></div>
+
+    <!-- Search + filter -->
+    <div class="filter-bar">
+      <div class="search-wrap"><span class="search-icon">🔍</span><input type="text" id="searchInput" placeholder="Search by name or university…" oninput="renderApps()"/></div>
+      <select class="filter-select" id="statusFilter" onchange="renderApps()">
+        <option value="">All statuses</option>
+        <option value="waiting">Waiting</option>
+        <option value="accepted">Accepted</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select class="filter-select" id="sortFilter" onchange="renderApps()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="name">Name A–Z</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="app-table">
+      <div class="app-table-head">
+        <div class="th">Student</div>
+        <div class="th">Offer applied to</div>
+        <div class="th">Date</div>
+        <div class="th">Status</div>
+        <div class="th" style="text-align:right">Actions</div>
+      </div>
+      <div id="appsList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Student profile drawer -->
+<div class="modal-overlay" id="profileDrawerOverlay" onclick="handleOverlayClick(event)">
+  <div class="profile-drawer" id="profileDrawer">
+    <div class="drawer-head">
+      <div class="drawer-title">Student Profile</div>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-foot" id="drawerFoot"></div>
+  </div>
+</div>
+
+<script>
+  // ── Data ───────────────────────────────────────────────────────────────────
+  const offers = [
+    { id: 'all', title: 'All Offers' },
+    { id: 1, title: 'Frontend Developer' },
+    { id: 2, title: 'Data Analyst' },
+    { id: 3, title: 'Backend Intern' },
+    { id: 4, title: 'UX Designer' },
+  ];
+
+  let applications = [
+    { id: 101, offerId: 1, offerTitle: 'Frontend Developer', name: 'Sara Müller',     uni: 'TU Berlin',           field: 'Computer Science',     year: 'Master 2', skills: ['React','CSS','TypeScript','Figma'], bio: 'Passionate frontend developer with 2 years of freelance experience.', date: '2025-03-25', status: 'waiting', color: '#4f8ef7' },
+    { id: 102, offerId: 2, offerTitle: 'Data Analyst',       name: 'Karim Bouali',    uni: 'University of Paris',  field: 'Data Science',         year: 'Master 1', skills: ['Python','SQL','Tableau','Pandas'],  bio: 'Data enthusiast with experience in analyzing large datasets.', date: '2025-03-22', status: 'accepted', color: '#34d399' },
+    { id: 103, offerId: 3, offerTitle: 'Backend Intern',     name: 'Lena Petrova',    uni: 'UCL London',           field: 'Software Engineering', year: '3rd year', skills: ['Node.js','Express','PostgreSQL'],     bio: 'Backend developer focused on scalable API design.', date: '2025-03-21', status: 'waiting', color: '#a78bfa' },
+    { id: 104, offerId: 1, offerTitle: 'Frontend Developer', name: 'Omar Tachrift',   uni: 'EPFL',                 field: 'Computer Science',     year: 'Master 1', skills: ['Vue.js','JavaScript','SCSS'],        bio: 'Creative developer who loves clean UI and performance.', date: '2025-03-20', status: 'rejected', color: '#fb923c' },
+    { id: 105, offerId: 2, offerTitle: 'Data Analyst',       name: 'Nadia Rousseau',  uni: 'Sciences Po',          field: 'Business Analytics',   year: 'Master 2', skills: ['Excel','Power BI','R','SQL'],        bio: 'Business analyst with a focus on data-driven decision making.', date: '2025-03-19', status: 'waiting', color: '#f472b6' },
+    { id: 106, offerId: 3, offerTitle: 'Backend Intern',     name: 'Yusuf Al-Farsi',  uni: 'University of Dubai',  field: 'Software Engineering', year: '3rd year', skills: ['Java','Spring Boot','MySQL'],         bio: 'Java developer interested in cloud infrastructure.', date: '2025-03-18', status: 'waiting', color: '#38bdf8' },
+    { id: 107, offerId: 4, offerTitle: 'UX Designer',        name: 'Elena Marchetti', uni: 'Politecnico di Milano',field: 'Design',               year: 'Master 2', skills: ['Figma','UX Research','Sketch'],      bio: 'UX designer with portfolio of 10+ shipped products.', date: '2025-03-17', status: 'accepted', color: '#a78bfa' },
+    { id: 108, offerId: 1, offerTitle: 'Frontend Developer', name: 'Amara Diallo',    uni: 'Université de Dakar',  field: 'Computer Science',     year: '3rd year', skills: ['HTML','CSS','JavaScript','React'],   bio: 'Self-taught developer with strong fundamentals.', date: '2025-03-16', status: 'waiting', color: '#fbbf24' },
+  ];
+
+  let activeOffer = 'all';
+  let openAppId   = null;
+
+  // ── Render offer tabs ──────────────────────────────────────────────────────
+  function renderTabs() {
+    document.getElementById('offerTabs').innerHTML = offers.map(o => {
+      const count = o.id === 'all' ? applications.length : applications.filter(a => a.offerId === o.id).length;
+      return `<button class="offer-tab ${activeOffer === o.id ? 'active' : ''}" onclick="setOffer('${o.id}')">
+        ${o.title}<span class="tab-count">${count}</span>
+      </button>`;
+    }).join('');
+  }
+  function setOffer(id) {
+    activeOffer = id === 'all' ? 'all' : parseInt(id) || id;
+    renderTabs(); renderStats(); renderApps();
+  }
+
+  // ── Stats ──────────────────────────────────────────────────────────────────
+  function renderStats() {
+    const filtered = activeOffer === 'all' ? applications : applications.filter(a => a.offerId === activeOffer);
+    const wait = filtered.filter(a => a.status === 'waiting').length;
+    const ok   = filtered.filter(a => a.status === 'accepted').length;
+    const no   = filtered.filter(a => a.status === 'rejected').length;
+    document.getElementById('statsStrip').innerHTML = `
+      <div class="stat-chip all"><div class="num">${filtered.length}</div><span style="color:var(--muted)">Total</span></div>
+      <div class="stat-chip wait"><div class="num">${wait}</div><span style="color:var(--muted)">Waiting</span></div>
+      <div class="stat-chip ok"><div class="num">${ok}</div><span style="color:var(--muted)">Accepted</span></div>
+      <div class="stat-chip no"><div class="num">${no}</div><span style="color:var(--muted)">Rejected</span></div>
+    `;
+    document.getElementById('sideApps').textContent = applications.filter(a=>a.status==='waiting').length;
+  }
+
+  // ── Render apps ────────────────────────────────────────────────────────────
+  const statusCfg = {
+    waiting:  { cls: 'sb-wait', label: '⏳ Waiting'  },
+    accepted: { cls: 'sb-ok',   label: '✓ Accepted' },
+    rejected: { cls: 'sb-no',   label: '✕ Rejected' },
+  };
+
+  function renderApps() {
+    let list = activeOffer === 'all' ? [...applications] : applications.filter(a => a.offerId === activeOffer);
+
+    const q      = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const sort   = document.getElementById('sortFilter').value;
+
+    if (q)      list = list.filter(a => a.name.toLowerCase().includes(q) || a.uni.toLowerCase().includes(q));
+    if (status) list = list.filter(a => a.status === status);
+
+    if (sort === 'newest') list.sort((a,b) => b.date.localeCompare(a.date));
+    else if (sort === 'oldest') list.sort((a,b) => a.date.localeCompare(b.date));
+    else list.sort((a,b) => a.name.localeCompare(b.name));
+
+    if (!list.length) {
+      document.getElementById('appsList').innerHTML = '<div class="empty-table">No applications match your filters.</div>';
+      return;
+    }
+
+    document.getElementById('appsList').innerHTML = list.map(a => `
+      <div class="app-row" id="row-${a.id}" onclick="openDrawer(${a.id})">
+        <div class="student-cell">
+          <div class="stu-avatar" style="background:linear-gradient(135deg,${a.color},${a.color}88)">${a.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div>
+            <div class="stu-name">${a.name}</div>
+            <div class="stu-uni">${a.uni}</div>
+          </div>
+        </div>
+        <div class="cell-text">${activeOffer === 'all' ? a.offerTitle : ''}</div>
+        <div class="cell-date">${formatDate(a.date)}</div>
+        <div class="status-wrap" onclick="event.stopPropagation()">
+          <div class="status-badge ${statusCfg[a.status].cls}" onclick="toggleDrop(${a.id})" id="badge-${a.id}">
+            ${statusCfg[a.status].label} ▾
+          </div>
+          <div class="status-drop" id="drop-${a.id}">
+            <div class="status-drop-item" onclick="setStatus(${a.id},'waiting')">⏳ Waiting</div>
+            <div class="status-drop-item" onclick="setStatus(${a.id},'accepted')">✓ Accept</div>
+            <div class="status-drop-item" onclick="setStatus(${a.id},'rejected')">✕ Reject</div>
+          </div>
+        </div>
+        <div class="app-actions" onclick="event.stopPropagation()">
+          <button class="btn-sm primary" onclick="openDrawer(${a.id})">View Profile</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function formatDate(d) {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  }
+
+  // ── Status dropdown ────────────────────────────────────────────────────────
+  function toggleDrop(id) {
+    document.querySelectorAll('.status-drop').forEach(d => { if (d.id !== `drop-${id}`) d.classList.remove('open'); });
+    document.getElementById(`drop-${id}`).classList.toggle('open');
+  }
+  function setStatus(id, status) {
+    const app = applications.find(a => a.id === id);
+    app.status = status;
+    document.querySelectorAll('.status-drop').forEach(d => d.classList.remove('open'));
+    renderStats(); renderApps();
+    if (openAppId === id) openDrawer(id);
+    // TODO: POST to set_application_status.php with { id, status }
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.status-wrap')) document.querySelectorAll('.status-drop').forEach(d => d.classList.remove('open'));
+  });
+
+  // ── Drawer ─────────────────────────────────────────────────────────────────
+  function openDrawer(id) {
+    openAppId = id;
+    const a = applications.find(x => x.id === id);
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="student-profile-header">
+        <div class="stu-avatar-lg" style="background:linear-gradient(135deg,${a.color},${a.color}88)">${a.name.split(' ').map(n=>n[0]).join('')}</div>
+        <div>
+          <div class="stu-profile-name">${a.name}</div>
+          <div class="stu-profile-uni">🏛 ${a.uni}</div>
+          <div class="stu-tags">
+            <span class="stu-tag">📚 ${a.field}</span>
+            <span class="stu-tag">📅 ${a.year}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Applied for</div>
+        <p style="color:var(--accent);font-weight:600;font-size:0.9rem">${a.offerTitle}</p>
+        <p style="font-size:0.78rem;color:var(--muted);margin-top:2px">Applied on ${formatDate(a.date)}</p>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">About</div>
+        <p>${a.bio || '—'}</p>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Skills</div>
+        <div class="skills-list">${a.skills.map(s=>`<span class="skill-chip">${s}</span>`).join('')}</div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Current Status</div>
+        <span class="status-badge ${statusCfg[a.status].cls}" style="cursor:default">${statusCfg[a.status].label}</span>
+      </div>
+    `;
+    document.getElementById('drawerFoot').innerHTML = `
+      <button class="btn-full btn-accept" onclick="setStatus(${a.id},'accepted')">✓ Accept</button>
+      <button class="btn-full btn-reject" onclick="setStatus(${a.id},'rejected')">✕ Reject</button>
+    `;
+    document.getElementById('profileDrawerOverlay').classList.add('open');
+  }
+
+  function closeDrawer() {
+    openAppId = null;
+    document.getElementById('profileDrawerOverlay').classList.remove('open');
+  }
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('profileDrawerOverlay')) closeDrawer();
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  renderTabs(); renderStats(); renderApps();
+
+  // Pre-filter by offer if URL param
+  const offerParam = new URLSearchParams(window.location.search).get('offer');
+  if (offerParam) setOffer(parseInt(offerParam));
+
+  (function() {
+    if (localStorage.getItem('il-theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('themeKnob').textContent = '☀️';
+    }
+  })();
+  function toggleTheme() {
+    const l = document.body.classList.toggle('light');
+    document.getElementById('themeKnob').textContent = l ? '☀️' : '🌙';
+    localStorage.setItem('il-theme', l ? 'light' : 'dark');
+  }
+</script>
+</body>
+</html>

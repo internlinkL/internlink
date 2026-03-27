@@ -55,11 +55,11 @@ $_SESSION['user_role']  = $user['role'];
 
 // ── Decide redirect URL based on role ─────────
 $redirectMap = [
-    'student' => '../student/Student_dashboard.html',
-    'company' => '../company/Company_dashboard.html',
+    'student' => '../student/html/Student_dashboard.html',
+    'company' => '../company/html/Company_dashboard.html',
     'admin'   => '../admin/admin_dashboard.html',
 ];
-$redirect = $redirectMap[$user['role']] ?? '../index.html';
+$redirect = $redirectMap[$user['role']] ?? '../html/index.html';
 
 echo json_encode([
     'success'  => true,

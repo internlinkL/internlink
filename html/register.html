@@ -358,7 +358,7 @@
     };
 
     // FIX: was incorrectly calling login.php — now correctly calls register.php
-    fetch('register.php', {
+    fetch('../register.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify(data),

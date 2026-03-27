@@ -327,7 +327,7 @@
     btn.textContent = 'Sending code…';
     btn.disabled    = true;
 
-    fetch('../login.php', {
+    fetch('../phpsecure/login.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password: pass, role: selectedRole })
@@ -400,7 +400,7 @@
     btn.textContent = 'Verifying…';
     btn.disabled    = true;
 
-    fetch('../verify_2fa.php', {
+    fetch('../phpsecure/verify_2fa.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ otp })
@@ -428,7 +428,7 @@
     document.getElementById('resendBtn').disabled = true;
     clearOtp();
 
-    fetch('../login.php', {
+    fetch('../phpsecure/login.php', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password: pass, role: selectedRole })

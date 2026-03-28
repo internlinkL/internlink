@@ -342,7 +342,15 @@
         document.getElementById('sentTo').textContent = email;
         showTwoFaPanel();
         startResendTimer(60);
-        // DEV ONLY: auto-fill OTP if mail() failed on localhost
+        // DEV: read OTP from log file at internlink/logs/otp_dev.log
+        if (data.dev_otp) {
+          const digits = document.querySelectorAll('.otp-digit');
+          [...data.dev_otp].forEach((ch, i) => { if (digits[i]) digits[i].value = ch; });
+          showMsg('otpSuccess', '⚠️ Dev mode: OTP auto-filled (' + data.dev_otp + ')', 'success');
+        }
+      } else {
+        showMsg('loginError', data.message || 'Login failed.');
+      }
     })
     .catch(() => showMsg('loginError', 'Server error. Please try again.'))
     .finally(() => { btn.textContent = 'Log In'; btn.disabled = false; });

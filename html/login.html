@@ -421,7 +421,10 @@
     .then(data => {
       if (data.success) {
         showMsg('otpSuccess', '✓ Verified! Redirecting…', 'success');
-        setTimeout(() => { window.location.href = data.redirect; }, 900);
+        setTimeout(() => {
+          // Use absolute path directly — no dependency on data.redirect
+          window.location.replace('/internlink/company/html/Company_dashboard.html');
+        }, 900);
       } else {
         showMsg('otpError', data.message || 'Verification failed.');
         clearOtp();

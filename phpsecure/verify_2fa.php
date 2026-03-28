@@ -21,7 +21,7 @@ if (strlen($otp) !== 6 || !ctype_digit($otp)) {
     exit;
 }
 
-// ── Find user by OTP directly in DB — no session needed ──
+// Find user by OTP directly — no session needed
 try {
     $stmt = $pdo->prepare(
         'SELECT * FROM users WHERE two_fa_code = ? AND two_fa_expires > NOW()'
@@ -38,21 +38,20 @@ if (!$user) {
     exit;
 }
 
-// ── Clear OTP ─────────────────────────────────
+// Clear OTP
 $pdo->prepare('UPDATE users SET two_fa_code = NULL, two_fa_expires = NULL WHERE id = ?')
     ->execute([$user['id']]);
 
-// ── Start full session ────────────────────────
+// Start full session
 $_SESSION['user_id']    = $user['id'];
 $_SESSION['user_email'] = $user['email'];
 $_SESSION['user_name']  = $user['first_name'] . ' ' . $user['last_name'];
 $_SESSION['user_role']  = $user['role'];
 
-// ── Redirect ──────────────────────────────────
 $base = '/internlink';
 $redirectMap = [
-    'company' => $base . '/company/html/Company_dashboard.html',
-    'student' => $base . '/student/html/Student_dashboard.html',
+    'company' => $base . '/company/html/company_dashboard.html',
+    'student' => $base . '/student/html/student_dashboard.html',
     'admin'   => $base . '/admin/html/admin_dashboard.html',
 ];
 $redirect = $redirectMap[$user['role']] ?? $base . '/html/index.html';

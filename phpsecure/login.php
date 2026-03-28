@@ -1,12 +1,6 @@
 <?php
-// ─────────────────────────────────────────────
-//  login.php  —  internLink
-//  Step 1 of login: validate credentials,
-//  generate a 6-digit 2FA code, store it in DB,
-//  and send it via email.
-//  POST fields: email, password, role
-// ─────────────────────────────────────────────
-
+error_reporting(0);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
 session_start();
 require_once __DIR__ . '/db.php';
@@ -30,60 +24,54 @@ if (!in_array($role, ['student', 'company', 'admin'])) {
     exit;
 }
 
-// ── Look up user ──────────────────────────────
-$stmt = $pdo->prepare('SELECT * FROM users WHERE email = ? AND role = ?');
-$stmt->execute([$email, $role]);
-$user = $stmt->fetch();
+try {
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ? AND role = ?');
+    $stmt->execute([$email, $role]);
+    $user = $stmt->fetch();
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    exit;
+}
 
 if (!$user || !password_verify($password, $user['password'])) {
     echo json_encode(['success' => false, 'message' => 'Incorrect email, password, or role.']);
     exit;
 }
 
-// ── Generate 6-digit OTP ──────────────────────
 $otp     = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-$expires = date('Y-m-d H:i:s', time() + 600); // 10 minutes
+$expires = date('Y-m-d H:i:s', time() + 600);
 
-// ── Save OTP to DB ────────────────────────────
-$stmt = $pdo->prepare(
-    'UPDATE users SET two_fa_code = ?, two_fa_expires = ? WHERE id = ?'
-);
-$stmt->execute([$otp, $expires, $user['id']]);
+try {
+    $pdo->prepare('UPDATE users SET two_fa_code = ?, two_fa_expires = ? WHERE id = ?')
+        ->execute([$otp, $expires, $user['id']]);
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Failed to save OTP: ' . $e->getMessage()]);
+    exit;
+}
 
-// ── Store user id temporarily in session ──────
 $_SESSION['pending_user_id'] = $user['id'];
 $_SESSION['pending_role']    = $user['role'];
 
-// ── Send email with OTP ───────────────────────
-$to      = $user['email'];
-$subject = 'Your internLink verification code';
-$body    = "Hello {$user['first_name']},\n\n"
-         . "Your internLink login verification code is:\n\n"
-         . "  {$otp}\n\n"
-         . "This code expires in 10 minutes.\n\n"
-         . "If you did not request this, please ignore this email.\n\n"
-         . "— The internLink Team";
-$headers = 'From: no-reply@internlink.com';
+$mailSent = @mail(
+    $user['email'],
+    'Your internLink verification code',
+    "Hello {$user['first_name']},\n\nYour code is: {$otp}\n\nExpires in 10 minutes.\n\n— internLink",
+    'From: no-reply@internlink.com'
+);
 
-$mailSent = @mail($to, $subject, $body, $headers);
-
-// ── DEV FALLBACK: log OTP to file if mail() fails ─
-// Remove this block before going to production!
 if (!$mailSent) {
-    $logDir  = __DIR__ . '/../logs/';
+    $logDir = __DIR__ . '/../logs/';
     if (!is_dir($logDir)) mkdir($logDir, 0755, true);
-    $logFile = $logDir . 'otp_dev.log';
-    $logLine = '[' . date('Y-m-d H:i:s') . '] '
-             . 'Email: ' . $email
-             . ' | OTP: ' . $otp
-             . ' | Expires: ' . $expires . PHP_EOL;
-    file_put_contents($logFile, $logLine, FILE_APPEND);
+    file_put_contents(
+        $logDir . 'otp_dev.log',
+        '[' . date('Y-m-d H:i:s') . '] Email: ' . $user['email'] . ' | OTP: ' . $otp . PHP_EOL,
+        FILE_APPEND
+    );
 }
 
 echo json_encode([
     'success'      => true,
     'requires_2fa' => true,
     'message'      => '2FA code sent to your email.',
-    // DEV ONLY — remove before production:
     'dev_otp'      => $mailSent ? null : $otp,
 ]);

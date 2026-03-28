@@ -1,43 +1,26 @@
 <?php
+
+error_reporting(0);
+ini_set('display_errors', 0);
+
+session_save_path(sys_get_temp_dir());
+session_name('internlink_session');
+session_start();
 // ─────────────────────────────────────────────
 //  company_profile_save.php  —  internLink
-//  GET  → returns current profile data for
-//         populating the form fields
-//  POST → saves basic info or contact info
+//  Saves or updates the company profile.
+//  Handles both basic info and contact info.
+//  POST fields: section, companyName, country,
+//               city, sector, description,
+//               website, size (basic section)
+//               contactEmail, phone, linkedin
+//               (contact section)
 // ─────────────────────────────────────────────
 
 header('Content-Type: application/json');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth_guard.php';
 
-// ── GET: load profile into form ───────────────
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-
-    $stmt = $pdo->prepare(
-        'SELECT u.email,
-                cp.company_name, cp.country, cp.sector,
-                cp.description, cp.avatar_path,
-                cp.phone, cp.linkedin
-         FROM users u
-         LEFT JOIN company_profiles cp ON cp.user_id = u.id
-         WHERE u.id = ?'
-    );
-    $stmt->execute([$companyUserId]);
-    $profile = $stmt->fetch();
-
-    if (!$profile) {
-        echo json_encode(['success' => false, 'message' => 'Profile not found.']);
-        exit;
-    }
-
-    echo json_encode([
-        'success' => true,
-        'profile' => $profile,
-    ]);
-    exit;
-}
-
-// ── POST: save profile ────────────────────────
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
     exit;
@@ -85,7 +68,8 @@ if ($section === 'basic') {
         $avatarPath = '../uploads/avatars/' . $filename;
     }
 
-    $sql    = 'UPDATE company_profiles SET company_name = ?, country = ?, sector = ?, description = ?';
+    $sql = 'UPDATE company_profiles
+            SET company_name = ?, country = ?, sector = ?, description = ?';
     $params = [$companyName, $country, $sector, $description];
 
     if ($avatarPath) {

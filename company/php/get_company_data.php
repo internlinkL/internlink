@@ -1,13 +1,12 @@
 <?php
-// ─────────────────────────────────────────────
-//  get_company_data.php  —  internLink
-//  Returns all data needed to populate the
-//  company dashboard: stats, recent apps,
-//  active offers, activity feed, profile info.
-//  GET request, returns JSON.
-// ─────────────────────────────────────────────
-
+error_reporting(0);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
+
+session_save_path(sys_get_temp_dir());
+session_name('internlink_session');
+session_start();
+
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth_guard.php';
 
@@ -36,39 +35,23 @@ if (count($parts) >= 2) {
 }
 
 // ── Stats ─────────────────────────────────────
-// Active offers count
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM internship_offers WHERE company_id = ? AND status = 'active'");
 $stmt->execute([$companyUserId]);
 $activeOffersCount = (int) $stmt->fetchColumn();
 
-// Total applications
-$stmt = $pdo->prepare(
-    'SELECT COUNT(*) FROM applications a
-     JOIN internship_offers o ON o.id = a.offer_id
-     WHERE o.company_id = ?'
-);
+$stmt = $pdo->prepare('SELECT COUNT(*) FROM applications a JOIN internship_offers o ON o.id = a.offer_id WHERE o.company_id = ?');
 $stmt->execute([$companyUserId]);
 $totalApps = (int) $stmt->fetchColumn();
 
-// Pending (waiting) applications
-$stmt = $pdo->prepare(
-    "SELECT COUNT(*) FROM applications a
-     JOIN internship_offers o ON o.id = a.offer_id
-     WHERE o.company_id = ? AND a.status = 'waiting'"
-);
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM applications a JOIN internship_offers o ON o.id = a.offer_id WHERE o.company_id = ? AND a.status = 'waiting'");
 $stmt->execute([$companyUserId]);
 $pendingApps = (int) $stmt->fetchColumn();
 
-// Accepted applications
-$stmt = $pdo->prepare(
-    "SELECT COUNT(*) FROM applications a
-     JOIN internship_offers o ON o.id = a.offer_id
-     WHERE o.company_id = ? AND a.status = 'accepted'"
-);
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM applications a JOIN internship_offers o ON o.id = a.offer_id WHERE o.company_id = ? AND a.status = 'accepted'");
 $stmt->execute([$companyUserId]);
 $acceptedApps = (int) $stmt->fetchColumn();
 
-// ── Recent applications (last 5) ──────────────
+// ── Recent applications ───────────────────────
 $stmt = $pdo->prepare(
     "SELECT a.id, a.status, a.applied_at,
             u.first_name, u.last_name,
@@ -85,7 +68,7 @@ $stmt = $pdo->prepare(
 $stmt->execute([$companyUserId]);
 $recentApps = $stmt->fetchAll();
 
-// ── Active offers (with applicant count) ─────
+// ── Active offers ─────────────────────────────
 $stmt = $pdo->prepare(
     "SELECT o.id, o.title, o.field, o.location, o.duration, o.status,
             COUNT(a.id) AS applicant_count
@@ -101,29 +84,28 @@ $activeOffers = $stmt->fetchAll();
 
 // ── Profile completion ────────────────────────
 $checks = [
-    'company_name'  => !empty($profile['company_name']),
-    'sector'        => !empty($profile['sector']),
-    'description'   => !empty($profile['description']),
-    'avatar'        => !empty($profile['avatar_path']),
+    'company_name' => !empty($profile['company_name']),
+    'sector'       => !empty($profile['sector']),
+    'description'  => !empty($profile['description']),
+    'avatar'       => !empty($profile['avatar_path']),
 ];
 $completedCount = count(array_filter($checks));
 $profilePct     = (int) round(($completedCount / count($checks)) * 100);
 
-// ── Response ──────────────────────────────────
 echo json_encode([
     'success' => true,
     'profile' => [
         'company_name' => $companyName,
         'initials'     => $initials,
-        'sector'       => $profile['sector'] ?? '',
-        'country'      => $profile['country'] ?? '',
+        'sector'       => $profile['sector']      ?? '',
+        'country'      => $profile['country']     ?? '',
         'avatar_path'  => $profile['avatar_path'] ?? '',
     ],
     'stats' => [
-        'active_offers'  => $activeOffersCount,
-        'total_apps'     => $totalApps,
-        'pending_apps'   => $pendingApps,
-        'accepted_apps'  => $acceptedApps,
+        'active_offers' => $activeOffersCount,
+        'total_apps'    => $totalApps,
+        'pending_apps'  => $pendingApps,
+        'accepted_apps' => $acceptedApps,
     ],
     'recent_apps'   => $recentApps,
     'active_offers' => $activeOffers,

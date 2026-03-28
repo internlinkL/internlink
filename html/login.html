@@ -342,12 +342,14 @@
         document.getElementById('sentTo').textContent = email;
         showTwoFaPanel();
         startResendTimer(60);
-        // DEV: read OTP from log file at internlink/logs/otp_dev.log
         if (data.dev_otp) {
           const digits = document.querySelectorAll('.otp-digit');
           [...data.dev_otp].forEach((ch, i) => { if (digits[i]) digits[i].value = ch; });
           showMsg('otpSuccess', '⚠️ Dev mode: OTP auto-filled (' + data.dev_otp + ')', 'success');
         }
+      } else if (data.success && !data.requires_2fa) {
+        // Direct login without 2FA
+        window.location.href = data.redirect;
       } else {
         showMsg('loginError', data.message || 'Login failed.');
       }

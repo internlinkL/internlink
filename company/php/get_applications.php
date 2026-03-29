@@ -1,6 +1,6 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+error_reporting(0);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth_guard.php';
@@ -20,20 +20,20 @@ $sql = "
         u.email,
         sp.university,
         sp.field_of_study,
-        sp.academic_year AS year,
-        sp.wilaya        AS city,
+        sp.year,
+        sp.city,
         sp.country,
         sp.skills,
         sp.bio,
-        sp.linkedin,
-        sp.github,
-        sp.cv_path,
-        io.id            AS offer_id,
-        io.title         AS offer_title
+        io.id           AS offer_id,
+        io.title        AS offer_title
     FROM applications a
-    JOIN users u               ON u.id   = a.student_id
-    LEFT JOIN student_profiles sp ON sp.user_id = u.id
-    JOIN internship_offers io  ON io.id  = a.offer_id
+    JOIN users u
+        ON u.id = a.student_id
+    LEFT JOIN student_profiles sp
+        ON sp.user_id = u.id
+    JOIN internship_offers io
+        ON io.id = a.offer_id
     WHERE io.company_id = ?
 ";
 

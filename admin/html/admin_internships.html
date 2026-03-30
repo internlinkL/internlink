@@ -152,7 +152,7 @@
     fetch(`../php/get_internships.php?status=${currentStatus}&q=${encodeURIComponent(q)}&page=${currentPage}`)
       .then(r => r.json())
       .then(d => {
-        if (!d.success) { window.location.href = '../../html/login.html'; return; }
+        if (!d.success) { window.location.href = '/internlink/html/login.html'; return; }
         renderTable(d.internships);
         renderPagination(d.page, d.pages);
       });

@@ -170,11 +170,11 @@
     fetch(`../php/get_users.php?role=${currentRole}&q=${encodeURIComponent(q)}&page=${currentPage}`)
       .then(r => r.json())
       .then(d => {
-        if (!d.success) { window.location.href = '../../html/login.html'; return; }
+        if (!d.success) { window.location.href = '/internlink/html/login.html'; return; }
         renderTable(d.users);
         renderPagination(d.page, d.pages);
       })
-      .catch(() => { window.location.href = '../../html/login.html'; });
+      .catch(() => { window.location.href = '/internlink/html/login.html'; });
   }
 
   function renderTable(users) {

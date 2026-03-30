@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
 
-$filter = $_GET['filter'] ?? 'pending';   // pending | verified | all
+$filter = $_GET['filter'] ?? 'all';
 $search = trim($_GET['q'] ?? '');
 $page   = max(1,(int)($_GET['page'] ?? 1));
 $limit  = 20;
@@ -34,10 +34,12 @@ $total = (int)$cntStmt->fetchColumn();
 
 $stmt = $pdo->prepare("
     SELECT u.id, u.first_name, u.last_name, u.email, u.created_at,
-           cp.company_name, cp.sector, cp.country, cp.wilaya,
-           cp.website, cp.description, COALESCE(cp.is_verified,0) AS is_verified,
-           (SELECT COUNT(*) FROM internships WHERE company_id=u.id) AS internship_count,
-           (SELECT COUNT(*) FROM applications a JOIN internships i ON i.id=a.internship_id WHERE i.company_id=u.id) AS app_count
+           cp.company_name, cp.sector, cp.country,
+           cp.description, COALESCE(cp.is_verified,0) AS is_verified,
+           (SELECT COUNT(*) FROM internship_offers WHERE company_id=u.id) AS internship_count,
+           (SELECT COUNT(*) FROM applications a 
+            JOIN internship_offers io ON io.id=a.offer_id 
+            WHERE io.company_id=u.id) AS app_count
     FROM users u
     LEFT JOIN company_profiles cp ON cp.user_id = u.id
     WHERE $whereSQL
@@ -52,5 +54,5 @@ echo json_encode([
     'companies' => $companies,
     'total'     => $total,
     'page'      => $page,
-    'pages'     => ceil($total / $limit),
+    'pages'     => (int)ceil($total / $limit),
 ]);

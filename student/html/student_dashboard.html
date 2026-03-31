@@ -183,10 +183,10 @@
 
   <!-- Stats -->
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Applications</div></div>
-    <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-val" id="stPending" style="-webkit-text-fill-color:var(--warn);background:none;color:var(--warn)">0</div><div class="stat-lbl">Pending</div></div>
-    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-val" id="stAccepted" style="-webkit-text-fill-color:var(--accent3);background:none;color:var(--accent3)">0</div><div class="stat-lbl">Accepted</div></div>
-    <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-val" id="stMatch">—</div><div class="stat-lbl">Avg Match %</div></div>
+    <div class="stat-card"><div class="stat-icon"></div><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Applications</div></div>
+    <div class="stat-card"><div class="stat-icon"></div><div class="stat-val" id="stPending" style="-webkit-text-fill-color:var(--warn);background:none;color:var(--warn)">0</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat-card"><div class="stat-icon"></div><div class="stat-val" id="stAccepted" style="-webkit-text-fill-color:var(--accent3);background:none;color:var(--accent3)">0</div><div class="stat-lbl">Accepted</div></div>
+    <div class="stat-card"><div class="stat-icon"></div><div class="stat-val" id="stMatch">—</div><div class="stat-lbl">Avg Match %</div></div>
   </div>
 
   <div class="dash-cols">
@@ -194,7 +194,7 @@
     <!-- Left -->
     <div>
       <div class="card">
-        <div class="card-hdr"><h3>🎯 Top Matches For You</h3><a href="internships_dash.html">See all →</a></div>
+        <div class="card-hdr"><h3>Top Matches For You</h3><a href="internships_dash.html">See all →</a></div>
         <div id="matchesList">
           <div class="skel" style="height:60px;margin-bottom:10px"></div>
           <div class="skel" style="height:60px;margin-bottom:10px"></div>
@@ -202,7 +202,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-hdr"><h3>📋 Recent Applications</h3><a href="applications.html">View all →</a></div>
+        <div class="card-hdr"><h3> Recent Applications</h3><a href="applications.html">View all →</a></div>
         <div id="appsList">
           <div class="skel" style="height:48px;margin-bottom:8px"></div>
           <div class="skel" style="height:48px;margin-bottom:8px"></div>
@@ -215,7 +215,7 @@
     <div>
       <div class="card">
         <div class="card-hdr">
-          <h3>👤 Profile Strength</h3>
+          <h3> Profile Strength</h3>
           <span id="profilePct" style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:var(--accent)">0%</span>
         </div>
         <div class="profile-bar-wrap"><div class="profile-bar" id="profileBar" style="width:0%"></div></div>
@@ -225,7 +225,7 @@
       </div>
 
       <div class="card">
-        <div class="card-hdr"><h3>🔖 Saved Internships</h3><a href="internships_dash.html">Browse →</a></div>
+        <div class="card-hdr"><h3> Saved Internships</h3><a href="internships_dash.html">Browse →</a></div>
         <div id="savedList">
           <div class="skel" style="height:40px;margin-bottom:8px"></div>
           <div class="skel" style="height:40px"></div>
@@ -234,10 +234,10 @@
 
       <div class="tips-card">
         <h3>💡 Quick Tips</h3>
-        <div class="tip"><span>⚡</span>Add skills to unlock match scores on every internship.</div>
-        <div class="tip"><span>📄</span>Upload your CV so companies can access it instantly.</div>
-        <div class="tip"><span>✍️</span>A cover letter doubles your chances of being noticed.</div>
-        <div class="tip"><span>🌍</span>Set your country so companies nearby can find you.</div>
+        <div class="tip"><span></span>Add skills to unlock match scores on every internship.</div>
+        <div class="tip"><span></span>Upload your CV so companies can access it instantly.</div>
+        <div class="tip"><span></span>A cover letter doubles your chances of being noticed.</div>
+        <div class="tip"><span></span>Set your country so companies nearby can find you.</div>
       </div>
     </div>
 
@@ -249,10 +249,10 @@
 
   function loadDashboard() {
     Promise.all([
-      fetch('../php/get_profile.php').then(r => r.json()),
-      fetch('../php/get_internships.php').then(r => r.json()),
-      fetch('../php/get_applications.php').then(r => r.json()),
-      fetch('../php/get_saved.php').then(r => r.json()),
+      fetch('../php/get_profile.php', { credentials: 'include' }).then(r => r.json()),
+      fetch('../php/get_internships.php', { credentials: 'include' }).then(r => r.json()),
+      fetch('../php/get_applications.php', { credentials: 'include' }).then(r => r.json()),
+      fetch('../php/get_saved.php', { credentials: 'include' }).then(r => r.json()),
     ]).then(([prof, intern, apps, saved]) => {
       if (!prof.success) { window.location.href = '/internlink/html/login.html'; return; }
       renderWelcome(prof);
@@ -262,7 +262,7 @@
       renderProfile(prof);
       renderSaved(intern, saved);
     }).catch(() => {
-      fetch('../php/get_profile.php').then(r=>r.json()).then(d => {
+      fetch('../php/get_profile.php', { credentials: 'include' }).then(r=>r.json()).then(d => {
         if (!d.success) window.location.href = '/internlink/html/login.html';
         else renderWelcome(d);
       });
@@ -369,12 +369,12 @@
   function renderSaved(internData, savedData) {
     const el = document.getElementById('savedList');
     if (!savedData.success || !savedData.ids?.length) {
-      el.innerHTML = '<div class="mini-empty"><div class="ei">🔖</div>No saved internships yet.</div>';
+      el.innerHTML = '<div class="mini-empty"><div class="ei"></div>No saved internships yet.</div>';
       return;
     }
     const ids  = new Set(savedData.ids.map(Number));
     const list = (internData.internships||[]).filter(i=>ids.has(Number(i.id))).slice(0,4);
-    if (!list.length) { el.innerHTML = '<div class="mini-empty"><div class="ei">🔖</div>No saved internships yet.</div>'; return; }
+    if (!list.length) { el.innerHTML = '<div class="mini-empty"><div class="ei"></div>No saved internships yet.</div>'; return; }
     el.innerHTML = list.map(i => {
       const loc = [i.wilaya, i.country].filter(Boolean).join(', ')||'—';
       return `<div class="saved-row">

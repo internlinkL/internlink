@@ -267,7 +267,7 @@
 
   // ── get_applications.php ───────────────────────────────────────────────────
   function loadApplications() {
-    fetch('../php/get_applications.php')
+    fetch('../php/get_applications.php', { credentials: 'include' })
       .then(r => r.json())
       .then(d => {
         if (!d.success) { window.location.href = '/internlink/html/login.html'; return; }
@@ -461,7 +461,7 @@
   function confirmWithdraw() {
     const btn = document.getElementById('withdrawBtn');
     btn.textContent = 'Withdrawing…'; btn.disabled = true;
-    fetch('../php/withdraw_application.php', {
+    fetch('../php/withdraw_application.php', { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ application_id: withdrawId })

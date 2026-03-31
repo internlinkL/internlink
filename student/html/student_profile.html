@@ -545,7 +545,7 @@
 
   // ── Load profile from get_profile.php ─────────────────────────────────────
   function loadProfile() {
-    fetch('../php/get_profile.php')
+    fetch('../php/get_profile.php', { credentials: 'include' })
       .then(r => r.json())
       .then(d => {
         if (!d.success) { window.location.href = '/internlink/html/login.html'; return; }
@@ -632,7 +632,7 @@
     const btn = document.getElementById('saveInfoBtn');
     btn.textContent = 'Saving…'; btn.disabled = true;
 
-    fetch('../php/update_profile.php', {
+    fetch('../php/update_profile.php', { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -678,7 +678,7 @@
     ).join('');
   }
   function saveSkills() {
-    fetch('../php/update_profile.php', {
+    fetch('../php/update_profile.php', { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ skills: skills.join(', '), bio: document.getElementById('bioText').value })
@@ -712,7 +712,7 @@
     const btn = document.getElementById('uploadBtn');
     btn.textContent = 'Uploading…'; btn.disabled = true;
     const fd = new FormData(); fd.append('cv', cvFile);
-    fetch('../php/upload_cv.php', { method: 'POST', body: fd })
+    fetch('../php/upload_cv.php', { credentials: 'include',  method: 'POST', body: fd })
       .then(r => r.json())
       .then(d => {
         if (d.success) { showAlert('s', 'CV uploaded successfully!'); clearCV(); loadProfile(); }
@@ -738,7 +738,7 @@
     const newPw = document.getElementById('newPw').value;
     if (newPw !== document.getElementById('confPw').value) { showAlert('e', 'Passwords do not match.'); return; }
     if (newPw.length < 8) { showAlert('e', 'Password must be at least 8 characters.'); return; }
-    fetch('../php/change_password.php', {
+    fetch('../php/change_password.php', { credentials: 'include', 
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentPassword: document.getElementById('curPw').value, newPassword: newPw })
     })

@@ -9,8 +9,15 @@ $userId = $_SESSION['user_id'];
 $data   = json_decode(file_get_contents('php://input'), true);
 
 // ── Allowed student_profiles fields ────────────────────────────────────────
-$allowed = ['phone','university','field_of_study','academic_year',
-            'country','wilaya','bio','skills','linkedin','github'];
+// Real column names in student_profiles: university, field_of_study, year, city, country, skills, bio
+$allowed = ['university','field_of_study','country','bio','skills'];
+// Map frontend names -> real column names
+$colMap = [
+    'academic_year' => 'year',
+    'wilaya'        => 'city',
+    'year'          => 'year',
+    'city'          => 'city',
+];
 
 // ── Update first_name / last_name in users table ───────────────────────────
 if (isset($data['firstName']) || isset($data['lastName'])) {
@@ -26,13 +33,27 @@ if (isset($data['firstName']) || isset($data['lastName'])) {
 $sets   = [];
 $params = [];
 
+// Handle standard allowed fields
 foreach ($allowed as $field) {
-    // Accept both snake_case (field_of_study) and camelCase (fieldOfStudy)
     $camel = lcfirst(str_replace('_', '', ucwords($field, '_')));
     $val   = $data[$field] ?? $data[$camel] ?? null;
     if ($val !== null) {
         $sets[]   = "$field = ?";
         $params[] = trim((string)$val);
+    }
+}
+// Handle mapped fields (frontend name -> real column name)
+foreach ($colMap as $frontendKey => $realCol) {
+    $camel = lcfirst(str_replace('_', '', ucwords($frontendKey, '_')));
+    $val   = $data[$frontendKey] ?? $data[$camel] ?? null;
+    if ($val !== null) {
+        // Avoid duplicate if already added
+        $alreadySet = false;
+        foreach ($sets as $s) { if (strpos($s, "$realCol ") === 0) { $alreadySet = true; break; } }
+        if (!$alreadySet) {
+            $sets[]   = "$realCol = ?";
+            $params[] = trim((string)$val);
+        }
     }
 }
 

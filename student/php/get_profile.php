@@ -10,9 +10,14 @@ $userId = $_SESSION['user_id'];
 // ── Fetch profile ─────────────────────────────────────────────────────────
 $stmt = $pdo->prepare("
     SELECT u.id, u.first_name, u.last_name, u.email, u.role,
-           sp.phone, sp.university, sp.field_of_study, sp.academic_year,
-           sp.country, sp.wilaya, sp.bio, sp.skills,
-           sp.linkedin, sp.github, sp.cv_path
+           sp.university, sp.field_of_study,
+           sp.year        AS academic_year,
+           sp.city        AS wilaya,
+           sp.country, sp.bio, sp.skills,
+           NULL           AS phone,
+           NULL           AS linkedin,
+           NULL           AS github,
+           NULL           AS cv_path
     FROM users u
     LEFT JOIN student_profiles sp ON sp.user_id = u.id
     WHERE u.id = ?
@@ -39,16 +44,7 @@ $stmt2->execute([$userId]);
 $stats = $stmt2->fetch();
 
 // ── Current CV info ───────────────────────────────────────────────────────
-$cv = null;
-if (!empty($profile['cv_path'])) {
-    $fullPath = __DIR__ . '/' . $profile['cv_path'];
-    $cv = [
-        'filename'    => basename($profile['cv_path']),
-        'uploaded_at' => file_exists($fullPath)
-                         ? date('d/m/Y', filemtime($fullPath))
-                         : '—',
-    ];
-}
+$cv = null; // cv_path column not in student_profiles table yet
 
 echo json_encode([
     'success' => true,

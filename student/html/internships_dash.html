@@ -471,15 +471,19 @@
   // ── Load from PHP ──────────────────────────────────────────────────────────
   function loadInternships() {
     Promise.all([
-      fetch('../php/get_internships.php').then(r => r.json()),
-      fetch('../php/get_saved.php').then(r => r.json())
+      fetch('../php/get_internships.php', { credentials: 'include' }).then(r => r.json()),
+      fetch('../php/get_saved.php', { credentials: 'include' }).then(r => r.json()),
+      fetch('../php/get_applications.php', { credentials: 'include' }).then(r => r.json()),
     ])
-    .then(([iData, sData]) => {
+    .then(([iData, sData, aData]) => {
       if (!iData.success) { window.location.href = '/internlink/html/login.html'; return; }
       allInternships = iData.internships;
       appliedIds     = new Set((iData.applied_ids || []).map(Number));
       savedIds       = sData.success ? new Set((sData.ids || []).map(Number)) : new Set();
       document.getElementById('navAvatar').textContent = (iData.student_name || 'S')[0].toUpperCase();
+      if (aData && aData.success) {
+        document.getElementById('appBadge').textContent = (aData.applications || []).length;
+      }
       applyFilters();
     })
     .catch(() => {
@@ -811,7 +815,7 @@
   function submitApplication() {
     const btn = document.getElementById('applySubmitBtn');
     btn.textContent = 'Submitting…'; btn.disabled = true;
-    fetch('../php/apply.php', {
+    fetch('../php/apply.php', { credentials: 'include', 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ internship_id: currentInternship.id, cover_letter: document.getElementById('coverLetter').value })
@@ -841,7 +845,7 @@
   // ── Save / Unsave ──────────────────────────────────────────────────────────
   function toggleSave(id, btn) {
     const isSaved = savedIds.has(Number(id));
-    fetch('../php/save_internship.php', {
+    fetch('../php/save_internship.php', { credentials: 'include', 
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ internship_id: id, action: isSaved ? 'unsave' : 'save' })
     })

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Internships — internLink</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0f1e;
+      --surface: #111827;
+      --surface2: #1a2236;
+      --accent: #4f8ef7;
+      --accent2: #a78bfa;
+      --accent3: #34d399;
+      --text: #f0f4ff;
+      --muted: #8899bb;
+      --border: rgba(79,142,247,0.18);
+      --danger: #f87171;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+    /* ── Background blobs ── */
+    .bg-blobs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.12; animation: drift 12s ease-in-out infinite alternate; }
+    .blob-1 { width: 600px; height: 600px; background: #4f8ef7; top: -200px; left: -100px; }
+    .blob-2 { width: 500px; height: 500px; background: #a78bfa; bottom: -150px; right: -100px; animation-delay: 4s; }
+    @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(30px,20px) scale(1.05); } }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 60px;
+      background: rgba(10,15,30,0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.03em; text-decoration: none; color: var(--text); }
+    .logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-cta { display: flex; gap: 12px; align-items: center; }
+    .btn-ghost { padding: 9px 22px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-ghost:hover { background: rgba(79,142,247,0.1); border-color: var(--accent); }
+    .btn-primary { padding: 9px 22px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .btn-primary:hover { background: #3b7de8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,142,247,0.35); }
+
+    /* ── Page header ── */
+    .page-header {
+      position: relative; z-index: 1;
+      padding: 140px 60px 60px;
+      text-align: center;
+    }
+    .page-header .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border: 1px solid var(--border);
+      border-radius: 100px; background: rgba(79,142,247,0.08);
+      font-size: 0.8rem; font-weight: 500; color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); box-shadow: 0 0 8px var(--accent3); animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .page-header h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; }
+    .page-header h1 span { background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-header p { color: var(--muted); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+
+    /* ── Search & filters ── */
+    .controls {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 60px 32px;
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    }
+    .search-wrap {
+      flex: 1; min-width: 260px;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 11px 16px;
+      transition: border-color 0.2s;
+    }
+    .search-wrap:focus-within { border-color: var(--accent); }
+    .search-wrap input { border: none; outline: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; color: var(--text); flex: 1; }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .filter-select {
+      padding: 11px 16px; background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem; outline: none; cursor: pointer; transition: border-color 0.2s;
+    }
+    .filter-select:focus { border-color: var(--accent); }
+    .results-count { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+
+    /* ── Grid ── */
+    .offers-grid {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 60px 80px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── Offer card ── */
+    .offer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: all 0.25s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .offer-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .offer-card:hover { border-color: rgba(79,142,247,0.4); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .offer-card:hover::before { opacity: 1; }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+    .company-logo {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .card-status { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 100px; background: rgba(52,211,153,0.15); color: var(--accent3); }
+
+    .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+    .card-company { font-size: 0.82rem; color: var(--accent); font-weight: 500; margin-bottom: 12px; }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tag {
+      font-size: 0.72rem; font-weight: 500; padding: 4px 10px; border-radius: 6px;
+      background: var(--surface2); color: var(--muted); border: 1px solid var(--border);
+    }
+
+    .card-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .card-meta { font-size: 0.75rem; color: var(--muted); }
+    .btn-apply {
+      padding: 8px 20px; border-radius: 8px;
+      background: var(--accent); color: #fff; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+    }
+    .btn-apply:hover { background: #3b7de8; transform: translateY(-1px); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center; padding: 80px 24px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+    /* ── Skeleton ── */
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skel { background: linear-gradient(90deg, var(--surface2) 25%, rgba(79,142,247,0.05) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 8px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px; max-width: 560px; width: 100%;
+      position: relative; max-height: 90vh; overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      background: var(--surface2); border: none; color: var(--muted);
+      width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { color: var(--text); background: var(--border); }
+    .modal-logo {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; color: #fff;
+      margin-bottom: 16px;
+    }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+    .modal-company { color: var(--accent); font-size: 0.9rem; font-weight: 500; margin-bottom: 20px; }
+    .modal-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); background: var(--surface2); padding: 6px 12px; border-radius: 8px; }
+    .modal-section-title { font-weight: 700; font-size: 0.85rem; color: var(--text); margin-bottom: 8px; margin-top: 20px; }
+    .modal-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+    .modal-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .skill-tag { font-size: 0.75rem; padding: 4px 12px; border-radius: 6px; background: rgba(79,142,247,0.12); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
+    .modal-cta {
+      margin-top: 28px; padding: 14px; width: 100%; border-radius: 10px;
+      background: var(--accent); color: #fff; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .modal-cta:hover { background: #3b7de8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,142,247,0.35); }
+    .modal-note { text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
+    .modal-note a { color: var(--accent); text-decoration: none; }
+    .modal-note a:hover { text-decoration: underline; }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto 80px;
+      padding: 0 60px;
+    }
+    .cta-inner {
+      background: linear-gradient(135deg, rgba(79,142,247,0.15), rgba(167,139,250,0.1));
+      border: 1px solid rgba(79,142,247,0.25);
+      border-radius: 20px; padding: 48px;
+      text-align: center;
+    }
+    .cta-inner h2 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+    .cta-inner p { color: var(--muted); margin-bottom: 28px; }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── Light mode ── */
+    body.light { --bg: #f4f7ff; --surface: #ffffff; --surface2: #e8edf8; --text: #0f172a; --muted: #64748b; --border: rgba(59,125,232,0.2); }
+    body.light nav { background: rgba(244,247,255,0.85) !important; }
+
+    /* Theme toggle */
+    .theme-toggle { width: 44px; height: 24px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; position: relative; padding: 0; transition: all 0.3s; }
+    .theme-toggle-knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); transition: transform 0.3s; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    body.light .theme-toggle-knob { transform: translateX(20px); }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 120px 20px 40px; }
+      .controls, .offers-grid, .cta-banner { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <a class="logo" href="index.html">intern<span>Link</span></a>
+  <div class="nav-links">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#how">How it Works</a>
+    <a href="index.html#for-students">For Students</a>
+    <a href="index.html#for-companies">For Companies</a>
+    <a href="browse.html" class="active">Browse Internships</a>
+  </div>
+  <div class="nav-cta">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <div class="theme-toggle-knob" id="themeKnob">🌙</div>
+    </button>
+    <a href="login.html" class="btn-ghost">Log In</a>
+    <a href="register.html" class="btn-primary">Sign Up</a>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="badge"><div class="badge-dot"></div> Live Opportunities</div>
+  <h1>Browse <span>Internships</span></h1>
+  <p>Explore internship offers posted by verified companies. Sign up to apply and track your applications.</p>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="search-wrap">
+    <span style="color:var(--muted)">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search by title, company, or skill…" oninput="filterOffers()"/>
+  </div>
+  <select class="filter-select" id="fieldFilter" onchange="filterOffers()">
+    <option value="">All Fields</option>
+    <option value="Web Development">Web Development</option>
+    <option value="Data Science">Data Science</option>
+    <option value="Design">Design</option>
+    <option value="Marketing">Marketing</option>
+    <option value="Finance">Finance</option>
+    <option value="Engineering">Engineering</option>
+    <option value="Other">Other</option>
+  </select>
+  <select class="filter-select" id="locationFilter" onchange="filterOffers()">
+    <option value="">All Locations</option>
+  </select>
+  <span class="results-count" id="resultsCount"></span>
+</div>
+
+<!-- Offers Grid -->
+<div class="offers-grid" id="offersGrid">
+  <!-- Skeletons -->
+  <div class="offer-card"><div class="skel" style="height:180px"></div></div>
+  <div class="offer-card"><div class="skel" style="height:180px"></div></div>
+  <div class="offer-card"><div class="skel" style="height:180px"></div></div>
+</div>
+
+<!-- CTA Banner -->
+<div class="cta-banner">
+  <div class="cta-inner">
+    <h2>Ready to Apply?</h2>
+    <p>Create your free account to apply to internships, track your applications, and get matched based on your skills.</p>
+    <div class="cta-btns">
+      <a href="register.html" class="btn-primary" style="padding:14px 32px;font-size:1rem;border-radius:10px;font-weight:600">Create Free Account →</a>
+      <a href="login.html" class="btn-ghost" style="padding:14px 32px;font-size:1rem;border-radius:10px">Already have an account</a>
+    </div>
+  </div>
+</div>
+
+<!-- Offer Detail Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-logo" id="modalLogo"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-company" id="modalCompany"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-section-title">About this Internship</div>
+    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-section-title" id="skillsLabel" style="display:none">Required Skills</div>
+    <div class="modal-skills" id="modalSkills"></div>
+    <button class="modal-cta" onclick="goApply()">🚀 Apply Now — Sign Up Free</button>
+    <p class="modal-note">Already have an account? <a href="login.html">Log in to apply</a></p>
+  </div>
+</div>
+
+<script>
+  let allOffers = [];
+  let filteredOffers = [];
+
+  // ── Load offers from DB ────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTheme();
+    loadOffers();
+  });
+
+  function loadOffers() {
+    fetch('../student/php/get_internships_public.php')
+      .then(r => r.json())
+      .then(d => {
+        if (!d.success) { showError(); return; }
+        allOffers = d.internships || [];
+        populateLocationFilter();
+        filterOffers();
+      })
+      .catch(() => showError());
+  }
+
+  function showError() {
+    document.getElementById('offersGrid').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⚠️</div>
+        <h3>Could not load offers</h3>
+        <p>Please try again later.</p>
+      </div>`;
+  }
+
+  function populateLocationFilter() {
+    const locations = [...new Set(allOffers.map(o => o.location).filter(Boolean))];
+    const sel = document.getElementById('locationFilter');
+    locations.forEach(loc => {
+      const opt = document.createElement('option');
+      opt.value = loc; opt.textContent = loc;
+      sel.appendChild(opt);
+    });
+  }
+
+  function filterOffers() {
+    const q      = document.getElementById('searchInput').value.toLowerCase();
+    const field  = document.getElementById('fieldFilter').value.toLowerCase();
+    const loc    = document.getElementById('locationFilter').value.toLowerCase();
+
+    filteredOffers = allOffers.filter(o => {
+      const matchQ     = !q || o.title.toLowerCase().includes(q) || (o.company_name||'').toLowerCase().includes(q) || (o.skills||'').toLowerCase().includes(q);
+      const matchField = !field || (o.field||o.domain||'').toLowerCase().includes(field);
+      const matchLoc   = !loc   || (o.location||o.wilaya||'').toLowerCase().includes(loc);
+      return matchQ && matchField && matchLoc;
+    });
+
+    document.getElementById('resultsCount').textContent = filteredOffers.length + ' offer' + (filteredOffers.length !== 1 ? 's' : '') + ' found';
+    renderOffers();
+  }
+
+  function renderOffers() {
+    const grid = document.getElementById('offersGrid');
+    if (!filteredOffers.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><h3>No offers found</h3><p>Try adjusting your search or filters.</p></div>`;
+      return;
+    }
+    grid.innerHTML = filteredOffers.map((o, idx) => `
+      <div class="offer-card" onclick="openModal(${idx})">
+        <div class="card-top">
+          <div class="company-logo">${(o.company_name || '?')[0].toUpperCase()}</div>
+          <span class="card-status">● Active</span>
+        </div>
+        <div class="card-title">${esc(o.title)}</div>
+        <div class="card-company">${esc(o.company_name || '—')}</div>
+        <div class="card-tags">
+          ${o.field  ? `<span class="tag">📂 ${esc(o.field)}</span>` : ''}
+          ${o.location ? `<span class="tag">📍 ${esc(o.location)}</span>` : ''}
+          ${o.duration ? `<span class="tag">⏳ ${esc(o.duration)}</span>` : ''}
+        </div>
+        <div class="card-desc">${esc(o.description || 'No description provided.')}</div>
+        <div class="card-footer">
+          <span class="card-meta">${o.skills ? o.skills.split(',').slice(0,2).map(s => s.trim()).join(' · ') : 'No skills listed'}</span>
+          <button class="btn-apply" onclick="event.stopPropagation(); goApply()">Apply →</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+  function openModal(idx) {
+    const o = filteredOffers[idx];
+    document.getElementById('modalLogo').textContent    = (o.company_name || '?')[0].toUpperCase();
+    document.getElementById('modalTitle').textContent   = o.title;
+    document.getElementById('modalCompany').textContent = o.company_name || '—';
+    document.getElementById('modalDesc').textContent    = o.description || 'No description provided.';
+
+    const meta = [];
+    if (o.field)    meta.push(`<div class="meta-item">📂 ${esc(o.field)}</div>`);
+    if (o.location) meta.push(`<div class="meta-item">📍 ${esc(o.location)}</div>`);
+    if (o.duration) meta.push(`<div class="meta-item">⏳ ${esc(o.duration)}</div>`);
+    document.getElementById('modalMeta').innerHTML = meta.join('');
+
+    const skills = (o.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (skills.length) {
+      document.getElementById('skillsLabel').style.display = 'block';
+      document.getElementById('modalSkills').innerHTML = skills.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('');
+    } else {
+      document.getElementById('skillsLabel').style.display = 'none';
+      document.getElementById('modalSkills').innerHTML = '';
+    }
+
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+  }
+  function closeModalBtn() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function goApply() {
+    window.location.href = 'register.html';
+  }
+
+  // ── Theme ──────────────────────────────────────────────────────────────────
+  function applyTheme() {
+    if (localStorage.getItem('il-theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('themeKnob').textContent = '☀️';
+    }
+  }
+  function toggleTheme() {
+    const l = document.body.classList.toggle('light');
+    document.getElementById('themeKnob').textContent = l ? '☀️' : '🌙';
+    localStorage.setItem('il-theme', l ? 'light' : 'dark');
+  }
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>

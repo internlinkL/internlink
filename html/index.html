@@ -379,10 +379,11 @@
 <nav>
   <div class="logo">intern<span>Link</span></div>
   <div class="nav-links">
-    <a href="#">For Students</a>
-    <a href="#">For Companies</a>
-    <a href="#">How it Works</a>
-    <a href="#">About</a>
+    <a href="#features">Features</a>
+    <a href="#how">How it Works</a>
+    <a href="#for-students">For Students</a>
+    <a href="#for-companies">For Companies</a>
+    <a href="browse.html">Browse Internships</a>
   </div>
   <div class="nav-cta">
 
@@ -398,23 +399,18 @@
 <section class="hero">
   <div class="hero-badge">
     <span class="badge-dot"></span>
-    Now available worldwide
+    The smarter way to find internships
   </div>
 
-  <h1>Your Internship.<br/><span class="highlight">Found. Not Guessed.</span></h1>
+  <h1>Your Skills.<br/><span class="highlight">Your Internship.</span></h1>
 
   <p class="hero-sub">
-    internLink connects students worldwide with companies offering real internship opportunities — no connections needed, just your skills.
+    internLink matches students with verified companies based on real skills — not luck. Post offers, apply, and track everything in one place.
   </p>
 
-  <div class="user-toggle" id="userToggle">
-    <button class="toggle-btn active" onclick="setToggle(this, 'student')">I'm a Student</button>
-    <button class="toggle-btn" onclick="setToggle(this, 'company')">I'm a Company</button>
-  </div>
-
   <div class="hero-actions">
-    <a href="register.html" class="btn-primary btn-large" id="heroSignup">Create Student Account</a>
-    <a href="#how" class="btn-outline-large">See How It Works</a>
+    <a href="register.html" class="btn-primary btn-large">Get Started Free</a>
+    <a href="login.html" class="btn-outline-large">Log In</a>
   </div>
 
   <div class="stats-row">
@@ -445,7 +441,7 @@
 </section>
 
 <!-- Features -->
-<section class="section">
+<section class="section" id="features">
   <div class="section-label">Features</div>
   <div class="section-title">Everything you need<br/>to land the right internship</div>
   <p class="section-sub">Built for students and companies everywhere, with tools that actually simplify the process.</p>
@@ -515,14 +511,68 @@
   </div>
 </div>
 
+<!-- For Students -->
+<section class="section" id="for-students" style="background:rgba(79,142,247,0.04);border-radius:24px;margin:0 40px;">
+  <div class="section-label">For Students</div>
+  <div class="section-title">Find the internship<br/>that fits your skills</div>
+  <p class="section-sub">Create your profile once and let internLink do the matching. Browse verified offers, see your compatibility score, and apply in seconds.</p>
+  <div class="features-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="feature-card">
+      <div class="feature-icon icon-blue">🎯</div>
+      <div class="feature-title">Skill Match Score</div>
+      <p class="feature-desc">See exactly how well you match each offer before you apply — no more guessing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-purple">📄</div>
+      <div class="feature-title">Easy Applications</div>
+      <p class="feature-desc">Upload your CV once and apply to any internship with a single click.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-green">📊</div>
+      <div class="feature-title">Track Your Status</div>
+      <p class="feature-desc">Know instantly when a company accepts, rejects, or views your application.</p>
+    </div>
+  </div>
+  <div style="margin-top:36px;text-align:center">
+    <a href="register.html" class="btn-primary btn-large">Create Student Account →</a>
+  </div>
+</section>
+
+<!-- For Companies -->
+<section class="section" id="for-companies">
+  <div class="section-label">For Companies</div>
+  <div class="section-title">Find the right talent<br/>faster than ever</div>
+  <p class="section-sub">Post your internship offers, review matched candidates, and manage the entire hiring process from one dashboard.</p>
+  <div class="features-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="feature-card">
+      <div class="feature-icon icon-orange">📝</div>
+      <div class="feature-title">Post Offers Instantly</div>
+      <p class="feature-desc">Create and publish internship offers in minutes. Edit or close them anytime.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-blue">👥</div>
+      <div class="feature-title">Pre-Matched Candidates</div>
+      <p class="feature-desc">Receive applications from students whose skills match your requirements automatically.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-purple">✅</div>
+      <div class="feature-title">Accept or Reject</div>
+      <p class="feature-desc">Review student profiles and respond to applications directly from your dashboard.</p>
+    </div>
+  </div>
+  <div style="margin-top:36px;text-align:center">
+    <a href="register.html" class="btn-primary btn-large">Post Your First Offer →</a>
+  </div>
+</section>
+
 <!-- CTA -->
 <div class="cta-section">
   <div class="cta-card">
-    <div class="cta-title">Ready to start?<br/>Your internship is waiting.</div>
-    <p class="cta-sub">Join thousands of students worldwide already finding opportunities through internLink.</p>
+    <div class="cta-title">Ready to get started?<br/>Join internLink today.</div>
+    <p class="cta-sub">Whether you're a student looking for your first internship or a company searching for fresh talent — internLink is built for you.</p>
     <div class="cta-btns">
-      <a href="register.html" class="btn-primary btn-large">Get Started Free</a>
-      <a href="login.html" class="btn-outline-large">I already have an account</a>
+      <a href="register.html" class="btn-primary btn-large">Create Free Account</a>
+      <a href="login.html" class="btn-outline-large">Already have an account</a>
     </div>
   </div>
 </div>
@@ -535,17 +585,6 @@
 </footer>
 
 <script>
-  function setToggle(btn, type) {
-    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const heroSignup = document.getElementById('heroSignup');
-    if (type === 'company') {
-      heroSignup.textContent = 'Post an Internship Offer';
-    } else {
-      heroSignup.textContent = 'Create Student Account';
-    }
-  }
-
   // Subtle scroll-based fade-in
   const cards = document.querySelectorAll('.feature-card, .step');
   const io = new IntersectionObserver(entries => {

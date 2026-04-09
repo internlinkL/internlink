@@ -149,6 +149,7 @@
   <a class="logo" href=>intern<span>Link</span></a>
   <div class="nav-right">
     <button class="theme-toggle" onclick="toggleTheme()"><div class="theme-knob" id="themeKnob">🌙</div></button>
+    <a href="notifications.html" id="notifBtn" title="Notifications" style="position:relative;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;flex-shrink:0;text-decoration:none">🔔<span id="notifBadge" style="position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:var(--danger);color:#fff;font-size:.6rem;font-weight:800;border-radius:100px;display:none;align-items:center;justify-content:center;padding:0 4px;font-family:Syne,sans-serif">0</span></a>
     <div class="nav-avatar" id="navAvatar">S</div>
   </div>
 </nav>
@@ -160,6 +161,7 @@
     <a class="nav-link" href="student_profile.html"><span class="icon">👤</span>My Profile</a>
     <a class="nav-link" href="internships_dash.html"><span class="icon">🔍</span>Browse Internships</a>
     <a class="nav-link" href="applications.html"><span class="icon">📋</span>My Applications <span class="nav-badge" id="appBadge">0</span></a>
+    <a class="nav-link" href="notifications.html"><span class="icon">🔔</span>Notifications <span class="nav-badge" id="sidebarNotifBadge" style="display:none">0</span></a>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Account</div>
@@ -400,5 +402,16 @@
   }
   function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 </script>
+
+<!-- Notification dropdown -->
+<div id="notifDropdown" style="display:none;position:fixed;top:68px;right:80px;width:360px;max-height:480px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:300;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
+    <span style="font-family:Syne,sans-serif;font-size:.95rem;font-weight:800">Notifications</span>
+    <a href="notifications.html" style="font-size:.78rem;color:var(--accent);text-decoration:none;font-weight:600">View all →</a>
+  </div>
+  <div id="notifList" style="overflow-y:auto;max-height:400px"></div>
+</div>
+
+<script src="../js/notifications.js"></script>
 </body>
 </html>

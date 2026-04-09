@@ -286,7 +286,8 @@
       <div class="theme-knob" id="themeKnob">🌙</div>
     </button>
     <div class="nav-user">
-      <div class="nav-avatar" id="navAvatar">A</div>
+      <a href="notifications.html" id="notifBtn" title="Notifications" style="position:relative;width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s;flex-shrink:0;text-decoration:none">🔔<span id="notifBadge" style="position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;background:var(--danger);color:#fff;font-size:.6rem;font-weight:800;border-radius:100px;display:none;align-items:center;justify-content:center;padding:0 4px;font-family:Syne,sans-serif">0</span></a>
+    <div class="nav-avatar" id="navAvatar">A</div>
       <span class="nav-name" id="navName">Student</span>
     </div>
   </div>
@@ -300,6 +301,7 @@
     <a class="nav-link active" href="student_profile.html"><span class="icon">👤</span>My Profile</a>
     <a class="nav-link" href="internships_dash.html"><span class="icon">🔍</span>Browse Internships</a>
     <a class="nav-link" href="applications.html"><span class="icon">📋</span>My Applications <span class="nav-badge" id="appBadge">0</span></a>
+    <a class="nav-link" href="notifications.html"><span class="icon">🔔</span>Notifications <span class="nav-badge" id="sidebarNotifBadge" style="display:none">0</span></a>
   </div>
   <div class="sidebar-section">
     <div class="sidebar-label">Account</div>
@@ -527,6 +529,27 @@
         <input class="form-input" type="password" id="confPw"/>
       </div>
       <button class="btn btn-primary" onclick="changePw()">Update Password</button>
+    </div>
+    <div class="card" style="max-width:480px;margin-top:20px;border-color:rgba(248,113,113,.25)">
+      <div class="card-title" style="color:var(--danger)">⚠️ Delete Account</div>
+      <p style="font-size:.875rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+        Permanently deletes your account, profile, CV, and all applications.
+        <strong style="color:var(--text)">This action cannot be undone.</strong>
+      </p>
+      <div class="form-group">
+        <label class="form-label">Type <strong>DELETE</strong> to confirm</label>
+        <input class="form-input" type="text" id="deleteConfirm" placeholder="DELETE"
+               style="border-color:rgba(248,113,113,.3)"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Enter your current password</label>
+        <input class="form-input" type="password" id="deletePassword" placeholder="Your password"/>
+      </div>
+      <button class="btn btn-danger" onclick="deleteAccount()"
+              style="background:var(--danger);color:#fff;border:none;padding:10px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s"
+              id="deleteBtn">
+        Delete My Account
+      </button>
     </div>
   </div>
 
@@ -777,6 +800,49 @@
   }
 
   // ── Theme ──────────────────────────────────────────────────────────────────
+  // ── Delete Account ─────────────────────────────────────────────────────────
+  function deleteAccount() {
+    const confirm = document.getElementById('deleteConfirm').value.trim();
+    const password = document.getElementById('deletePassword').value;
+
+    if (confirm !== 'DELETE') {
+      showAlert('e', 'Please type DELETE to confirm.');
+      return;
+    }
+    if (!password) {
+      showAlert('e', 'Please enter your password.');
+      return;
+    }
+
+    const btn = document.getElementById('deleteBtn');
+    btn.textContent = 'Deleting…';
+    btn.disabled = true;
+
+    // Verify password first via change_password check, then delete
+    fetch('../php/delete_account.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'action=delete_account&password=' + encodeURIComponent(password),
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        showAlert('s', 'Account deleted. Redirecting…');
+        setTimeout(() => window.location.href = '/internlink/html/index.html', 1500);
+      } else {
+        showAlert('e', d.message || 'Failed to delete account.');
+        btn.textContent = 'Delete My Account';
+        btn.disabled = false;
+      }
+    })
+    .catch(() => {
+      showAlert('e', 'Server error. Please try again.');
+      btn.textContent = 'Delete My Account';
+      btn.disabled = false;
+    });
+  }
+
   function applyTheme() {
     if (localStorage.getItem('il-theme') === 'light') {
       document.body.classList.add('light');
@@ -792,5 +858,16 @@
   // ── Utility ────────────────────────────────────────────────────────────────
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
+
+<!-- Notification dropdown -->
+<div id="notifDropdown" style="display:none;position:fixed;top:68px;right:80px;width:360px;max-height:480px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:300;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
+    <span style="font-family:Syne,sans-serif;font-size:.95rem;font-weight:800">Notifications</span>
+    <a href="notifications.html" style="font-size:.78rem;color:var(--accent);text-decoration:none;font-weight:600">View all →</a>
+  </div>
+  <div id="notifList" style="overflow-y:auto;max-height:400px"></div>
+</div>
+
+<script src="../js/notifications.js"></script>
 </body>
 </html>

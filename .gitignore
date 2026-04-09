@@ -1,0 +1,21 @@
+# ─────────────────────────────────────────────
+#  .gitignore — internLink
+#  Files that should NEVER be pushed to GitHub
+# ─────────────────────────────────────────────
+
+# Secret credentials — keep only on your machine
+phpsecure/config.php
+
+# Uploaded files — too large for GitHub
+student/uploads/
+company/uploads/
+uploads/
+
+# Debug files
+phpsecure/google_callback_debug.php
+phpsecure/test.php
+
+# XAMPP / system files
+.DS_Store
+Thumbs.db
+*.log

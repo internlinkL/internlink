@@ -4,7 +4,7 @@ ini_set('display_errors', 0);
 
 // FIX: harden the session cookie before starting the session
 ini_set('session.cookie_httponly', 1);       // blocks JS from reading the cookie
-ini_set('session.cookie_samesite', 'Strict'); // blocks cross-site requests from sending the cookie
+ini_set('session.cookie_samesite', 'Lax'); // blocks cross-site requests from sending the cookie
 // ini_set('session.cookie_secure', 1);       // uncomment when HTTPS is enabled
 ini_set('session.cookie_path', '/');
 

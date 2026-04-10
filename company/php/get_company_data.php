@@ -5,12 +5,6 @@ header('Content-Type: application/json');
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_httponly', '1');
-session_save_path(sys_get_temp_dir());
-session_name('internlink_session');
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-
 require_once __DIR__ . '/../../phpsecure/db.php';
 require_once __DIR__ . '/../../phpsecure/auth_guard.php';
 

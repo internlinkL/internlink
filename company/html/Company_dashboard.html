@@ -444,11 +444,9 @@
         document.getElementById('statPending').textContent  = data.stats.pending_apps;
         document.getElementById('offersCount').textContent  = data.stats.active_offers;
         document.getElementById('appsCount').textContent    = data.stats.pending_apps;
-        // Boosted display numbers for visual appeal
-        const BOOST_APPS = 47; const BOOST_ACCEPTED = 12; const BOOST_OFFERS = 3;
-        document.getElementById('statOffers').textContent   = data.stats.active_offers  + BOOST_OFFERS;
-        document.getElementById('statApps').textContent     = data.stats.total_apps     + BOOST_APPS;
-        document.getElementById('statAccepted').textContent = data.stats.accepted_apps  + BOOST_ACCEPTED;
+        document.getElementById('statOffers').textContent   = data.stats.active_offers;
+        document.getElementById('statApps').textContent     = data.stats.total_apps;
+        document.getElementById('statAccepted').textContent = data.stats.accepted_apps;
 
         // ── Delta labels ─────────────────────────────────────────────────
         const pd = document.getElementById('statPendingDelta');

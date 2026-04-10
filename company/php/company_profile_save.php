@@ -2,12 +2,6 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_httponly', '1');
-session_save_path(sys_get_temp_dir());
-session_name('internlink_session');
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
-
 // ─────────────────────────────────────────────
 //  company_profile_save.php — internLink
 //  Saves or updates the company profile.

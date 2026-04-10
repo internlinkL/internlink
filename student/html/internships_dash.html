@@ -321,6 +321,16 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
+<script>
+  fetch("../php/check_session.php", { credentials: "include" })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.loggedIn || data.role !== "student") {
+        window.location.href = "/internlink/html/login.html";
+      }
+    })
+    .catch(() => { window.location.href = "/internlink/html/login.html"; });
+</script>
  
 <div class="bg-blobs">
   <div class="blob blob-1"></div>

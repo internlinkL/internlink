@@ -178,7 +178,7 @@
   fetch("/internlink/phpsecure/check_session.php", { credentials: "include" })
     .then(r => r.json())
     .then(data => {
-      if (data.loggedIn === false) {
+      if (!data.loggedIn || data.role !== "company") {
         window.location.href = "/internlink/html/login.html";
       }
     });

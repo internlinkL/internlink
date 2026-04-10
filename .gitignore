@@ -5,7 +5,8 @@
 
 # Secret credentials — keep only on your machine
 phpsecure/config.php
-
+phpsecure/google_auth.php
+phpsecure/mailer.php
 # Uploaded files — too large for GitHub
 student/uploads/
 company/uploads/

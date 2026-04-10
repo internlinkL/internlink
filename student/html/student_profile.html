@@ -306,14 +306,13 @@
 </head>
 <body>
 <script>
-  fetch("../php/check_session.php", { credentials: "include" })
+  fetch("/internlink/phpsecure/check_session.php", { credentials: "include" })
     .then(r => r.json())
     .then(data => {
-      if (!data.loggedIn || data.role !== "student") {
+      if (data.loggedIn === false) {
         window.location.href = "/internlink/html/login.html";
       }
-    })
-    .catch(() => { window.location.href = "/internlink/html/login.html"; });
+    });
 </script>
 
 <!-- Background blobs -->

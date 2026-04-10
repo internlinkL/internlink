@@ -79,6 +79,15 @@
   </style>
 </head>
 <body>
+<script>
+  fetch("/internlink/phpsecure/check_session.php", { credentials: "include" })
+    .then(r => r.json())
+    .then(data => {
+      if (data.loggedIn === false) {
+        window.location.href = "/internlink/html/login.html";
+      }
+    });
+</script>
 <div class="bg-blobs"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
 
 <nav>
